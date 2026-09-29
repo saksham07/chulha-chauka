@@ -689,7 +689,7 @@ function CheckoutModal({
     note: '',
   });
 
-  const [payMethod, setPayMethod] = useState('cod');
+  const [payMethod, setPayMethod] = useState('upi');
   const [errors, setErrors]       = useState({});
 
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -744,10 +744,11 @@ function CheckoutModal({
           amount: orderData.totalPaise,
           currency: 'INR',
           name: 'Chulha Chauka',
-          description: `Order #${orderData.orderId}`,
+          description: `Order #${orderData.orderId} · 100% Pure Veg`,
           order_id: orderData.razorpayOrderId,
           handler: async function (response) {
             try {
+              setLoading(true);
               await api.verifyPayment(
                 response.razorpay_order_id,
                 response.razorpay_payment_id,
@@ -756,19 +757,42 @@ function CheckoutModal({
               setPlacedOrder(orderData);
               setOrdered(true);
             } catch (vErr) {
-              setApiError('Payment verification failed. Please contact support.');
+              setApiError('Payment verification failed. Please contact support or retry.');
+            } finally {
+              setLoading(false);
             }
           },
           prefill: {
             name: form.name,
             contact: form.phone,
           },
+          config: payMethod === 'upi' ? {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'Pay via UPI',
+                  instruments: [{ method: 'upi' }],
+                },
+              },
+              sequence: ['block.upi'],
+              preferences: {
+                show_default_blocks: true,
+              },
+            },
+          } : undefined,
+          modal: {
+            ondismiss: function () {
+              setLoading(false);
+              setApiError('UPI payment was cancelled or closed. You can retry or switch to Cash on Delivery.');
+            },
+          },
           theme: { color: '#e65b16' },
         };
 
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (resp) {
-          setApiError(resp.error?.description || 'Payment was cancelled or failed.');
+          setLoading(false);
+          setApiError(resp.error?.description || 'UPI payment was declined or failed.');
         });
         rzp.open();
       } else {
@@ -839,8 +863,20 @@ function CheckoutModal({
 
         <div className="checkout-body">
           {apiError && (
-            <div className="field-error" style={{ padding: '8px 12px', background: '#ffebee', borderRadius: 8, marginBottom: 12 }}>
-              ⚠️ {apiError}
+            <div className="payment-error-box">
+              <div className="payment-error-text">⚠️ {apiError}</div>
+              {step === 2 && (
+                <div className="payment-error-actions">
+                  <button type="button" onClick={placeOrder} className="retry-btn">
+                    🔄 Retry Payment
+                  </button>
+                  {payMethod !== 'cod' && (
+                    <button type="button" onClick={() => { setPayMethod('cod'); setApiError(''); }} className="switch-cod-btn">
+                      💵 Switch to Cash on Delivery
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -925,9 +961,26 @@ function CheckoutModal({
               <h3>Payment Method</h3>
               <div className="pay-options">
                 {[
-                  { id: 'cod',  label: 'Cash on Delivery',    icon: '💵' },
-                  { id: 'upi',  label: 'UPI / QR Code',      icon: '📱' },
-                  { id: 'card', label: 'Debit / Credit Card', icon: '💳' },
+                  {
+                    id: 'upi',
+                    label: 'UPI (Google Pay, PhonePe, Paytm, QR)',
+                    badge: 'Recommended ⚡',
+                    subtext: 'Instant UPI PIN payment or Scan QR Code',
+                    icon: '⚡',
+                    tags: ['GPay', 'PhonePe', 'Paytm', 'BHIM', 'CRED'],
+                  },
+                  {
+                    id: 'card',
+                    label: 'Debit / Credit Card & Netbanking',
+                    subtext: 'Visa, Mastercard, RuPay & all major banks',
+                    icon: '💳',
+                  },
+                  {
+                    id: 'cod',
+                    label: 'Cash on Delivery',
+                    subtext: `Pay ₹${total} in cash when food arrives at your door`,
+                    icon: '💵',
+                  },
                 ].map(opt => (
                   <label key={opt.id} className={`pay-option ${payMethod === opt.id ? 'selected' : ''}`}>
                     <input
@@ -935,27 +988,38 @@ function CheckoutModal({
                       name="pay"
                       value={opt.id}
                       checked={payMethod === opt.id}
-                      onChange={() => setPayMethod(opt.id)}
+                      onChange={() => { setPayMethod(opt.id); setApiError(''); }}
                     />
                     <span className="pay-icon">{opt.icon}</span>
-                    <span>{opt.label}</span>
+                    <div className="pay-info">
+                      <div className="pay-label-row">
+                        <b>{opt.label}</b>
+                        {opt.badge && <span className="pay-badge">{opt.badge}</span>}
+                      </div>
+                      <small>{opt.subtext}</small>
+                      {opt.tags && (
+                        <div className="pay-tags">
+                          {opt.tags.map(t => <span key={t} className="pay-tag">{t}</span>)}
+                        </div>
+                      )}
+                    </div>
                   </label>
                 ))}
               </div>
 
-              {payMethod === 'cod' && (
-                <div className="upi-note">
-                  <p>Pay ₹{total} in cash upon delivery at your door. Please keep exact change ready.</p>
-                </div>
-              )}
               {payMethod === 'upi' && (
                 <div className="upi-note">
-                  <p>⚡ Pay seamlessly with GPay, PhonePe, or Paytm via Razorpay gateway.</p>
+                  <p><b>⚡ Fast & Direct:</b> Opens your UPI App (Google Pay, PhonePe, Paytm) on mobile, or shows a dynamic QR code to scan from your phone.</p>
                 </div>
               )}
               {payMethod === 'card' && (
                 <div className="upi-note">
-                  <p>🔒 100% secure card checkout powered by <b>Razorpay</b>.</p>
+                  <p>🔒 100% secure card & netbanking checkout powered by <b>Razorpay</b>.</p>
+                </div>
+              )}
+              {payMethod === 'cod' && (
+                <div className="upi-note">
+                  <p>💵 Pay ₹{total} in cash upon delivery. Please keep exact change ready.</p>
                 </div>
               )}
 
