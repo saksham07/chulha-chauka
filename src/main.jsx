@@ -12,11 +12,16 @@ import OrderTrackingModal from './components/OrderTrackingModal';
 
 import logo from './assets/logo.png';
 import heroFood from './assets/food/hero-food.png';
-import matarPaneer from './assets/food/matar-paneer.png';
-import friedRicePaneer from './assets/food/fried-rice-paneer.png';
-import thali from './assets/food/thali.png';
-import shahiPaneer from './assets/food/shahi-paneer.png';
-import cheeseMaggie from './assets/food/cheese-maggie.png';
+import matarPaneer from './assets/food/matar-paneer-new.jpg';
+import friedRicePaneer from './assets/food/fried-rice-new.jpg';
+import specialVegThali from './assets/food/special-veg-thali-new.jpg';
+import desiThali from './assets/food/desi-thali-new.jpg';
+import deluxePaneerThali from './assets/food/deluxe-paneer-thali-new.jpg';
+import shahiPaneer from './assets/food/shahi-paneer-new.jpg';
+import masalaMaggie from './assets/food/masala-maggie-new.jpg';
+import cheeseMaggie from './assets/food/cheese-maggie-new.jpg';
+import steamedRice from './assets/food/steamed-rice-new.jpg';
+import jeeraRice from './assets/food/jeera-rice-new.jpg';
 import dalTadka from './assets/food/dal-tadka.jpg';
 import gheeRoti from './assets/food/ghee-roti.jpg';
 import pooriSabji from './assets/food/poori-sabji.jpg';
@@ -35,10 +40,16 @@ import aaluBhujiaParatha from './assets/food/aalu-bhujia-paratha.jpg';
 
 const imageMap = {
   'matar-paneer': matarPaneer,
-  'fried-rice-paneer': friedRicePaneer,
-  'thali': thali,
+  'fried-rice': friedRicePaneer,
+  'special-veg-thali': specialVegThali,
+  'desi-thali': desiThali,
+  'deluxe-paneer-thali': deluxePaneerThali,
+  'thali': specialVegThali,
   'shahi-paneer': shahiPaneer,
+  'masala-maggie': masalaMaggie,
   'cheese-maggie': cheeseMaggie,
+  'steamed-rice': steamedRice,
+  'jeera-rice': jeeraRice,
   'dal-tadka': dalTadka,
   'ghee-roti': gheeRoti,
   'poori-sabji': pooriSabji,
@@ -56,7 +67,7 @@ const imageMap = {
 };
 
 function resolveFoodImage(item) {
-  if (!item) return thali;
+  if (!item) return specialVegThali;
 
   // External custom URL uploaded via admin (http/https)
   const rawImg = item.imageUrl || item.image;
@@ -68,6 +79,12 @@ function resolveFoodImage(item) {
   if (item.name) {
     const n = item.name.toLowerCase().trim();
 
+    // Thalis
+    if (n.includes('deluxe paneer thali')) return deluxePaneerThali;
+    if (n.includes('special veg thali')) return specialVegThali;
+    if (n.includes('desi thali')) return desiThali;
+    if (n.includes('thali')) return specialVegThali;
+
     // Desserts
     if (n.includes('kheer')) return shahiKheer;
     if (n.includes('sewai')) return meethiSewai;
@@ -76,7 +93,7 @@ function resolveFoodImage(item) {
     if (n.includes('poha')) return masalaPoha;
     if (n.includes('pasta')) return desiPasta;
     if (n.includes('cheese maggie')) return cheeseMaggie;
-    if (n.includes('maggie')) return cheeseMaggie;
+    if (n.includes('masala maggie') || n.includes('maggie')) return masalaMaggie;
 
     // Dal
     if (n.includes('dal') || n.includes('tadka')) return dalTadka;
@@ -92,8 +109,9 @@ function resolveFoodImage(item) {
 
     // Rice
     if (n.includes('pulao')) return vegPulao;
-    if (n.includes('jeera rice')) return vegPulao;
-    if (n.includes('rice') && !n.includes('paneer')) return vegPulao;
+    if (n.includes('jeera rice')) return jeeraRice;
+    if (n.includes('steamed rice') || n.includes('basmati rice')) return steamedRice;
+    if (n.includes('rice') && !n.includes('paneer')) return steamedRice;
 
     // Bread
     if (n.includes('ghee roti') || n.includes('roti')) return gheeRoti;
@@ -102,11 +120,11 @@ function resolveFoodImage(item) {
     // Curries
     if (n.includes('kadhai paneer')) return kadhaiPaneer;
     if (n.includes('matar paneer')) return matarPaneer;
-    if (n.includes('shahi paneer') || n.includes('paneer bhurji')) return shahiPaneer;
+    if (n.includes('shahi paneer')) return shahiPaneer;
+    if (n.includes('bhurji')) return alooParatha;
     if (n.includes('paneer')) return shahiPaneer;
 
-    // Thali & Combos
-    if (n.includes('thali')) return thali;
+    // Combos
     if (n.includes('combo')) return heroFood;
   }
 
@@ -116,7 +134,7 @@ function resolveFoodImage(item) {
     if (url.includes(key)) return img;
   }
 
-  return thali;
+  return specialVegThali;
 }
 
 /* ─── App ─────────────────────────────────────────────────────────────────── */
