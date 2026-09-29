@@ -30,6 +30,5 @@ target/
 
 ### Environment / Secrets ###
 .env
-application-prod.yml
 *.class
 *.log
