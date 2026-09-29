@@ -174,6 +174,24 @@ public class OrderService {
         return OrderResponse.from(order);
     }
 
+    public OrderResponse cancelMyOrder(Long userId, Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id " + orderId));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new BusinessException("Access denied: You do not own this order.");
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new BusinessException("Order cannot be cancelled because kitchen has already started preparing it.");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        Order updated = orderRepository.save(order);
+        log.info("User {} cancelled Order ID {}", userId, orderId);
+        return OrderResponse.from(updated);
+    }
+
     @Transactional(readOnly = true)
     public OrderResponse findById(Long orderId) {
         Order order = orderRepository.findById(orderId)

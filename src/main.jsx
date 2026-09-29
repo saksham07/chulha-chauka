@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  ArrowRight, Check, ChevronLeft, Heart, Leaf,
-  LogOut, MapPin, Menu as MenuIcon, Minus, Plus, Search,
+  ArrowRight, Bike, Check, ChevronLeft, Clock, Heart, Leaf,
+  LogOut, MapPin, Menu as MenuIcon, Minus, Package, Plus, Search,
   ShoppingBag, Sparkles, Star, User as UserIcon, X,
 } from 'lucide-react';
 import './styles.css';
 import api from './services/api';
+import OrderHistoryModal from './components/OrderHistoryModal';
+import OrderTrackingModal from './components/OrderTrackingModal';
 
 import logo from './assets/logo.png';
 import heroFood from './assets/food/hero-food.png';
@@ -62,6 +64,8 @@ function App() {
   const [menuOpen,       setMenuOpen]       = useState(false);
   const [checkoutOpen,   setCheckoutOpen]   = useState(false);
   const [authModalOpen,  setAuthModalOpen]  = useState(false);
+  const [ordersModalOpen, setOrdersModalOpen] = useState(false);
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
   const [activeSection,  setActiveSection]  = useState('home');
 
   const [currentUser, setCurrentUser] = useState(() => {
@@ -288,16 +292,39 @@ function App() {
             <a className={activeSection === 'about'   ? 'active' : ''} href="#about"   onClick={() => setMenuOpen(false)}>About Us</a>
             <a className={activeSection === 'reviews' ? 'active' : ''} href="#reviews" onClick={() => setMenuOpen(false)}>Reviews</a>
             <a className={activeSection === 'contact' ? 'active' : ''} href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+            {currentUser && (
+              <a
+                href="#orders"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMenuOpen(false);
+                  setOrdersModalOpen(true);
+                }}
+                style={{ color: 'var(--orange2)' }}
+              >
+                📋 My Orders
+              </a>
+            )}
           </nav>
           <div className="nav-actions">
             {/* User Auth Info */}
             {currentUser ? (
-              <div className="user-badge">
-                <UserIcon size={15} />
-                <span>Hi, <b>{currentUser.name?.split(' ')[0]}</b></span>
-                <button className="logout-btn" onClick={handleLogout} title="Log out">
-                  <LogOut size={13} />
+              <div className="user-nav-group">
+                <button
+                  className="orders-nav-btn"
+                  onClick={() => setOrdersModalOpen(true)}
+                  title="My Orders & Tracking"
+                >
+                  <Clock size={15} />
+                  <span>My Orders</span>
                 </button>
+                <div className="user-badge">
+                  <UserIcon size={15} />
+                  <span>Hi, <b>{currentUser.name?.split(' ')[0]}</b></span>
+                  <button className="logout-btn" onClick={handleLogout} title="Log out">
+                    <LogOut size={13} />
+                  </button>
+                </div>
               </div>
             ) : (
               <button className="login-btn" onClick={() => setAuthModalOpen(true)}>
@@ -616,6 +643,7 @@ function App() {
           onClose={() => setCheckoutOpen(false)}
           onSuccess={() => { clearCart(); setCheckoutOpen(false); }}
           onBack={() => { setCheckoutOpen(false); setCartOpen(true); }}
+          onTrackOrder={(orderId) => setTrackingOrderId(orderId)}
         />
       )}
 
@@ -624,6 +652,41 @@ function App() {
         <AuthModal
           onClose={() => setAuthModalOpen(false)}
           onSuccess={handleAuthSuccess}
+        />
+      )}
+
+      {/* ── Order History Modal ── */}
+      {ordersModalOpen && (
+        <OrderHistoryModal
+          currentUser={currentUser}
+          onClose={() => setOrdersModalOpen(false)}
+          onTrackOrder={(orderId) => {
+            setOrdersModalOpen(false);
+            setTrackingOrderId(orderId);
+          }}
+          onReorder={(items) => {
+            if (!items || items.length === 0) return;
+            items.forEach(it => {
+              if (it.menuItemId) {
+                const found = menu.find(m => m.id === it.menuItemId);
+                if (found) add(found);
+              }
+            });
+            setOrdersModalOpen(false);
+            setCartOpen(true);
+          }}
+        />
+      )}
+
+      {/* ── Live Order Tracking Modal ── */}
+      {trackingOrderId && (
+        <OrderTrackingModal
+          orderId={trackingOrderId}
+          onClose={() => setTrackingOrderId(null)}
+          onBackToHistory={() => {
+            setTrackingOrderId(null);
+            setOrdersModalOpen(true);
+          }}
         />
       )}
     </div>
@@ -673,7 +736,7 @@ const STEPS = ['Delivery', 'Review', 'Payment'];
 
 function CheckoutModal({
   cartItems, subtotal, total, deliveryFee, estimatedMinutes,
-  currentUser, onNeedAuth, onClose, onSuccess, onBack
+  currentUser, onNeedAuth, onClose, onSuccess, onBack, onTrackOrder
 }) {
   const [step, setStep]         = useState(0);
   const [ordered, setOrdered]   = useState(false);
@@ -823,9 +886,22 @@ function CheckoutModal({
             <p className="order-note muted">
               Payment method: <b>{payMethod.toUpperCase()}</b> · Confirmation sent to <b>{form.phone}</b>.
             </p>
-            <button className="primary-btn" onClick={onSuccess} style={{ marginTop: 18 }}>
-              Back to Home
-            </button>
+            <div style={{ display: 'flex', gap: 10, marginTop: 18, width: '100%', flexWrap: 'wrap' }}>
+              <button
+                className="primary-btn"
+                style={{ flex: 1, minWidth: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                onClick={() => {
+                  const oid = placedOrder?.orderId;
+                  onSuccess();
+                  if (oid && onTrackOrder) onTrackOrder(oid);
+                }}
+              >
+                <Bike size={18} /> Track Order Live
+              </button>
+              <button className="ghost-btn" style={{ flex: 1, minWidth: 120 }} onClick={onSuccess}>
+                Back to Home
+              </button>
+            </div>
           </div>
         </div>
       </div>

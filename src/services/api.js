@@ -134,6 +134,16 @@ class ApiClient {
     return this.request('/orders/me');
   }
 
+  async getOrder(orderId) {
+    return this.request(`/orders/me/${orderId}`);
+  }
+
+  async cancelOrder(orderId) {
+    return this.request(`/orders/me/${orderId}/cancel`, {
+      method: 'PATCH',
+    });
+  }
+
   // ── Payment Endpoints ──────────────────────────────────────
   async createRazorpayOrder(amount, currency = 'INR', receipt = null) {
     return this.request('/create-order', {

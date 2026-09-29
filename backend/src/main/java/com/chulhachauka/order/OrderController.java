@@ -41,4 +41,12 @@ public class OrderController {
     ) {
         return ResponseEntity.ok(ApiResponse.ok(orderService.getMyOrder(user.getId(), orderId)));
     }
+
+    @PatchMapping("/me/{orderId}/cancel")
+    public ResponseEntity<ApiResponse<OrderResponse>> cancelMyOrder(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(orderService.cancelMyOrder(user.getId(), orderId)));
+    }
 }
