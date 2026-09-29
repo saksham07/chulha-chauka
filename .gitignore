@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs
+dist/
+build/
+backend/target/
+*.class
+
+# Environment variables & local secrets
+.env
+.env.local
+.env.*.local
+*.log
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
