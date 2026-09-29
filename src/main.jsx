@@ -17,6 +17,19 @@ import friedRicePaneer from './assets/food/fried-rice-paneer.png';
 import thali from './assets/food/thali.png';
 import shahiPaneer from './assets/food/shahi-paneer.png';
 import cheeseMaggie from './assets/food/cheese-maggie.png';
+import dalTadka from './assets/food/dal-tadka.jpg';
+import gheeRoti from './assets/food/ghee-roti.jpg';
+import pooriSabji from './assets/food/poori-sabji.jpg';
+import kadhiChawal from './assets/food/kadhi-chawal.jpg';
+import paneerChilli from './assets/food/paneer-chilli.jpg';
+import kadhaiPaneer from './assets/food/kadhai-paneer.jpg';
+import alooParatha from './assets/food/aloo-paratha.jpg';
+import vegPulao from './assets/food/veg-pulao.jpg';
+import desiPasta from './assets/food/desi-pasta.jpg';
+import masalaPoha from './assets/food/masala-poha.jpg';
+import shahiKheer from './assets/food/shahi-kheer.jpg';
+import meethiSewai from './assets/food/meethi-sewai.jpg';
+import aaluBhujiaParatha from './assets/food/aalu-bhujia-paratha.jpg';
 
 /* ─── Image mapping helper ────────────────────────────────────────────────── */
 
@@ -26,6 +39,19 @@ const imageMap = {
   'thali': thali,
   'shahi-paneer': shahiPaneer,
   'cheese-maggie': cheeseMaggie,
+  'dal-tadka': dalTadka,
+  'ghee-roti': gheeRoti,
+  'poori-sabji': pooriSabji,
+  'kadhi-chawal': kadhiChawal,
+  'paneer-chilli': paneerChilli,
+  'kadhai-paneer': kadhaiPaneer,
+  'aloo-paratha': alooParatha,
+  'veg-pulao': vegPulao,
+  'desi-pasta': desiPasta,
+  'masala-poha': masalaPoha,
+  'shahi-kheer': shahiKheer,
+  'meethi-sewai': meethiSewai,
+  'aalu-bhujia': aaluBhujiaParatha,
   'hero-food': heroFood,
 };
 
@@ -40,11 +66,44 @@ function resolveFoodImage(item) {
   }
   if (item.name) {
     const n = item.name.toLowerCase();
+    // Desserts
+    if (n.includes('kheer')) return shahiKheer;
+    if (n.includes('sewai')) return meethiSewai;
+
+    // Snacks
+    if (n.includes('poha')) return masalaPoha;
+    if (n.includes('pasta')) return desiPasta;
     if (n.includes('maggie')) return cheeseMaggie;
-    if (n.includes('thali')) return thali;
-    if (n.includes('rice') && n.includes('chilli')) return friedRicePaneer;
+
+    // Dal
+    if (n.includes('dal') || n.includes('tadka')) return dalTadka;
+
+    // Meals & Bihari Specials
+    if (n.includes('aalu bhujia') || n.includes('bhujia')) return aaluBhujiaParatha;
+    if (n.includes('poori') || n.includes('puri')) return pooriSabji;
+    if (n.includes('kadhi')) return kadhiChawal;
+
+    // Indo-Chinese & Starters
+    if (n.includes('fried rice') && n.includes('chilli')) return friedRicePaneer;
+    if (n.includes('chilli')) return paneerChilli;
+
+    // Rice
+    if (n.includes('pulao') || n.includes('jeera rice')) return vegPulao;
+    if (n.includes('rice') && !n.includes('paneer')) return vegPulao;
+
+    // Bread
+    if (n.includes('ghee roti') || n.includes('roti')) return gheeRoti;
+    if (n.includes('paratha')) return alooParatha;
+
+    // Curries
+    if (n.includes('kadhai paneer')) return kadhaiPaneer;
     if (n.includes('matar paneer')) return matarPaneer;
-    if (n.includes('paneer') || n.includes('paratha')) return shahiPaneer;
+    if (n.includes('shahi paneer') || n.includes('paneer bhurji')) return shahiPaneer;
+    if (n.includes('paneer')) return shahiPaneer;
+
+    // Thali & Combos
+    if (n.includes('thali')) return thali;
+    if (n.includes('combo')) return heroFood;
   }
   return thali;
 }

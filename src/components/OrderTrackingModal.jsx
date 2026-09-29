@@ -258,14 +258,14 @@ export default function OrderTrackingModal({ orderId, onClose, onBackToHistory }
               <div className="tracker-support-strip">
                 <a
                   className="support-action-btn call"
-                  href="tel:+917488023447"
+                  href="tel:+917003942386"
                   title="Call Cloud Kitchen"
                 >
-                  <Phone size={15} /> Call Kitchen (+91 74880 23447)
+                  <Phone size={15} /> Call Kitchen (+91 70039 42386)
                 </a>
                 <a
                   className="support-action-btn whatsapp"
-                  href={`https://wa.me/917488023447?text=Hi%20Chulha%20Chauka,%20I%20need%20an%20update%20on%20my%20order%20%23CC-${orderId}`}
+                  href={`https://wa.me/917003942386?text=Hi%20Chulha%20Chauka,%20I%20need%20an%20update%20on%20my%20order%20%23CC-${orderId}`}
                   target="_blank"
                   rel="noreferrer"
                   title="Chat on WhatsApp"
