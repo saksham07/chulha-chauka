@@ -57,15 +57,17 @@ const imageMap = {
 
 function resolveFoodImage(item) {
   if (!item) return thali;
-  if (item.image && typeof item.image === 'string' && !item.image.startsWith('/')) {
-    return item.image;
+
+  // External custom URL uploaded via admin (http/https)
+  const rawImg = item.imageUrl || item.image;
+  if (typeof rawImg === 'string' && (rawImg.startsWith('http://') || rawImg.startsWith('https://'))) {
+    return rawImg;
   }
-  const url = (item.imageUrl || item.image || '').toLowerCase();
-  for (const [key, img] of Object.entries(imageMap)) {
-    if (url.includes(key)) return img;
-  }
+
+  // 1. Match by dish name FIRST so each specific dish gets its authentic photo
   if (item.name) {
-    const n = item.name.toLowerCase();
+    const n = item.name.toLowerCase().trim();
+
     // Desserts
     if (n.includes('kheer')) return shahiKheer;
     if (n.includes('sewai')) return meethiSewai;
@@ -73,6 +75,7 @@ function resolveFoodImage(item) {
     // Snacks
     if (n.includes('poha')) return masalaPoha;
     if (n.includes('pasta')) return desiPasta;
+    if (n.includes('cheese maggie')) return cheeseMaggie;
     if (n.includes('maggie')) return cheeseMaggie;
 
     // Dal
@@ -84,11 +87,12 @@ function resolveFoodImage(item) {
     if (n.includes('kadhi')) return kadhiChawal;
 
     // Indo-Chinese & Starters
-    if (n.includes('fried rice') && n.includes('chilli')) return friedRicePaneer;
+    if (n.includes('fried rice')) return friedRicePaneer;
     if (n.includes('chilli')) return paneerChilli;
 
     // Rice
-    if (n.includes('pulao') || n.includes('jeera rice')) return vegPulao;
+    if (n.includes('pulao')) return vegPulao;
+    if (n.includes('jeera rice')) return vegPulao;
     if (n.includes('rice') && !n.includes('paneer')) return vegPulao;
 
     // Bread
@@ -105,6 +109,13 @@ function resolveFoodImage(item) {
     if (n.includes('thali')) return thali;
     if (n.includes('combo')) return heroFood;
   }
+
+  // 2. Fallback to imageMap by URL keyword
+  const url = (rawImg || '').toLowerCase();
+  for (const [key, img] of Object.entries(imageMap)) {
+    if (url.includes(key)) return img;
+  }
+
   return thali;
 }
 
