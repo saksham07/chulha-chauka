@@ -79,7 +79,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/menu/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/config/**").permitAll()
-                .requestMatchers("/api/payments/webhook").permitAll()
+                .requestMatchers("/api/payments/**", "/api/create-order", "/api/verify-payment").permitAll()
 
                 // Admin-only
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

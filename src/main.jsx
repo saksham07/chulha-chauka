@@ -740,7 +740,7 @@ function CheckoutModal({
 
       if (payMethod !== 'cod' && orderData.razorpayOrderId && !isMockRazorpay && window.Razorpay) {
         const options = {
-          key: orderData.razorpayKeyId,
+          key: orderData.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Thy9moEFSctyzu',
           amount: orderData.totalPaise,
           currency: 'INR',
           name: 'Chulha Chauka',

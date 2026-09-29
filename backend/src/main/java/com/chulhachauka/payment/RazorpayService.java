@@ -27,7 +27,15 @@ public class RazorpayService {
         this.keySecret = keySecret;
     }
 
+    public String getKeyId() {
+        return keyId;
+    }
+
     public String createOrder(long amountPaise, String receiptId) {
+        if (amountPaise < 100) {
+            throw new BusinessException("Order amount must be at least 100 paise (₹1.00)");
+        }
+
         if (keyId == null || keyId.isBlank() || keyId.startsWith("rzp_test_your_key") || keySecret == null || keySecret.isBlank()) {
             log.warn("Razorpay credentials not configured. Generating mock order ID for development.");
             return "order_mock_" + UUID.randomUUID().toString().replace("-", "").substring(0, 14);
@@ -39,7 +47,7 @@ public class RazorpayService {
             JSONObject orderRequest = new JSONObject();
             orderRequest.put("amount", amountPaise);
             orderRequest.put("currency", "INR");
-            orderRequest.put("receipt", receiptId);
+            orderRequest.put("receipt", receiptId != null && !receiptId.isBlank() ? receiptId : "rcpt_" + System.currentTimeMillis());
             orderRequest.put("payment_capture", 1);
 
             com.razorpay.Order order = client.orders.create(orderRequest);
@@ -54,6 +62,11 @@ public class RazorpayService {
         if (keySecret == null || keySecret.isBlank()) {
             log.warn("Razorpay key secret not configured; bypassing signature check in mock mode.");
             return true;
+        }
+
+        if (razorpayOrderId == null || razorpayPaymentId == null || signature == null) {
+            log.warn("Missing fields for signature verification.");
+            return false;
         }
 
         String payload = razorpayOrderId + "|" + razorpayPaymentId;

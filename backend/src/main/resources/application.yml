@@ -29,8 +29,8 @@ app:
     refresh-expiry-days: 30
 
 razorpay:
-  key-id: ${RAZORPAY_KEY_ID:}
-  key-secret: ${RAZORPAY_KEY_SECRET:}
+  key-id: ${RAZORPAY_KEY_ID:rzp_test_Thy9moEFSctyzu}
+  key-secret: ${RAZORPAY_KEY_SECRET:jvlvAsTHMs4QFqNMkDZOtu6l}
   webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
 
 cors:

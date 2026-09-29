@@ -30,14 +30,6 @@ public class PaymentService {
     private String webhookSecret;
 
     public void verifyAndCapture(VerifyPaymentRequest req) {
-        Payment payment = paymentRepository.findByRazorpayOrderId(req.razorpayOrderId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for Razorpay order ID " + req.razorpayOrderId()));
-
-        if (payment.getStatus() == PaymentStatus.CAPTURED) {
-            log.info("Payment for order {} is already CAPTURED (idempotent).", payment.getOrder().getId());
-            return;
-        }
-
         boolean valid = razorpayService.verifySignature(
                 req.razorpayOrderId(),
                 req.razorpayPaymentId(),
@@ -45,20 +37,28 @@ public class PaymentService {
         );
 
         if (!valid) {
-            log.error("Signature verification failed for order {}", payment.getOrder().getId());
+            log.error("Signature verification failed for Razorpay order ID {}", req.razorpayOrderId());
             throw new PaymentVerificationException("Razorpay signature mismatch");
         }
 
-        payment.setRazorpayPaymentId(req.razorpayPaymentId());
-        payment.setRazorpaySignature(req.razorpaySignature());
-        payment.setStatus(PaymentStatus.CAPTURED);
-        paymentRepository.save(payment);
+        paymentRepository.findByRazorpayOrderId(req.razorpayOrderId()).ifPresent(payment -> {
+            if (payment.getStatus() == PaymentStatus.CAPTURED) {
+                log.info("Payment for order {} is already CAPTURED (idempotent).", payment.getOrder().getId());
+                return;
+            }
 
-        Order order = payment.getOrder();
-        order.setStatus(OrderStatus.CONFIRMED);
-        orderRepository.save(order);
+            payment.setRazorpayPaymentId(req.razorpayPaymentId());
+            payment.setRazorpaySignature(req.razorpaySignature());
+            payment.setStatus(PaymentStatus.CAPTURED);
+            paymentRepository.save(payment);
 
-        log.info("Payment captured and Order {} CONFIRMED via Razorpay payment ID {}", order.getId(), req.razorpayPaymentId());
+            Order order = payment.getOrder();
+            if (order != null) {
+                order.setStatus(OrderStatus.CONFIRMED);
+                orderRepository.save(order);
+                log.info("Payment captured and Order {} CONFIRMED via Razorpay payment ID {}", order.getId(), req.razorpayPaymentId());
+            }
+        });
     }
 
     public void handleWebhook(String payload, String signature) {

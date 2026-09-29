@@ -134,7 +134,18 @@ class ApiClient {
     return this.request('/orders/me');
   }
 
-  // ── Payment Verification ────────────────────────────────────
+  // ── Payment Endpoints ──────────────────────────────────────
+  async createRazorpayOrder(amount, currency = 'INR', receipt = null) {
+    return this.request('/create-order', {
+      method: 'POST',
+      body: JSON.stringify({
+        amount,
+        currency,
+        receipt,
+      }),
+    });
+  }
+
   async verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature) {
     return this.request('/payments/verify', {
       method: 'POST',
