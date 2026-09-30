@@ -432,9 +432,9 @@ function App() {
             )}
           </nav>
           <div className="nav-actions">
-            {/* User Auth Info */}
+            {/* User Auth Info (Desktop only — on mobile, accessed via Hamburger drawer) */}
             {currentUser ? (
-              <div className="user-nav-group">
+              <div className="user-nav-group desktop-only">
                 <button
                   className="orders-nav-btn"
                   onClick={() => setOrdersModalOpen(true)}
@@ -443,7 +443,7 @@ function App() {
                   <Clock size={16} />
                   <span className="orders-nav-btn-text">My Orders</span>
                 </button>
-                <div className="user-badge desktop-only">
+                <div className="user-badge">
                   <UserIcon size={15} />
                   <span>Hi, <b>{currentUser.name?.split(' ')[0]}</b></span>
                   <button className="logout-btn" onClick={handleLogout} title="Log out">
@@ -452,7 +452,7 @@ function App() {
                 </div>
               </div>
             ) : (
-              <button className="login-btn" onClick={() => setAuthModalOpen(true)}>
+              <button className="login-btn desktop-only" onClick={() => setAuthModalOpen(true)}>
                 <UserIcon size={15} />
                 <span>Login</span>
               </button>
