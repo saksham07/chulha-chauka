@@ -375,6 +375,21 @@ function App() {
             <img src={logo} alt="Chulha Chauka" />
           </a>
           <nav className={`nav-links ${menuOpen ? 'open' : ''}`}>
+            {/* Mobile Drawer User Profile Header */}
+            {currentUser && (
+              <div className="mobile-drawer-user">
+                <div className="mobile-drawer-user-info">
+                  <div className="mobile-drawer-avatar">
+                    <UserIcon size={18} />
+                  </div>
+                  <div>
+                    <b>{currentUser.name}</b>
+                    <span>{currentUser.phone}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <a className={activeSection === 'home'    ? 'active' : ''} href="#home"    onClick={() => setMenuOpen(false)}>Home</a>
             <a className={activeSection === 'menu'    ? 'active' : ''} href="#menu"    onClick={() => setMenuOpen(false)}>Menu</a>
             <a className={activeSection === 'about'   ? 'active' : ''} href="#about"   onClick={() => setMenuOpen(false)}>About Us</a>
@@ -388,10 +403,32 @@ function App() {
                   setMenuOpen(false);
                   setOrdersModalOpen(true);
                 }}
-                style={{ color: 'var(--orange2)' }}
+                className="mobile-drawer-orders-link"
               >
-                📋 My Orders
+                <Clock size={16} /> My Orders & Live Tracking
               </a>
+            )}
+
+            {currentUser ? (
+              <button
+                className="mobile-drawer-logout-btn"
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+              >
+                <LogOut size={16} /> Log Out
+              </button>
+            ) : (
+              <button
+                className="mobile-drawer-login-btn"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setAuthModalOpen(true);
+                }}
+              >
+                <UserIcon size={16} /> Log In / Register
+              </button>
             )}
           </nav>
           <div className="nav-actions">
@@ -403,10 +440,10 @@ function App() {
                   onClick={() => setOrdersModalOpen(true)}
                   title="My Orders & Tracking"
                 >
-                  <Clock size={15} />
-                  <span>My Orders</span>
+                  <Clock size={16} />
+                  <span className="orders-nav-btn-text">My Orders</span>
                 </button>
-                <div className="user-badge">
+                <div className="user-badge desktop-only">
                   <UserIcon size={15} />
                   <span>Hi, <b>{currentUser.name?.split(' ')[0]}</b></span>
                   <button className="logout-btn" onClick={handleLogout} title="Log out">
